@@ -1,14 +1,16 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Scissors, Eye, EyeOff } from 'lucide-react';
+import { Scissors, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export const LoginForm: React.FC = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +27,7 @@ export const LoginForm: React.FC = () => {
         title: "Login realizado com sucesso!",
         description: "Bem-vindo ao BarberPro",
       });
+      navigate('/');
     } catch (error) {
       toast({
         title: "Erro no login",
@@ -39,26 +42,37 @@ export const LoginForm: React.FC = () => {
   const demoCredentials = [
     { email: 'super@barberpro.com', role: 'Super Admin' },
     { email: 'admin@barberpro.com', role: 'Administrador' },
-    { email: 'joao@barberpro.com', role: 'Barbeiro' },
-    { email: 'cliente@barberpro.com', role: 'Cliente' }
+    { email: 'joao@barberpro.com', role: 'Barbeiro' }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate('/')}
+            className="text-white hover:bg-amber-500/20"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h2 className="text-2xl font-bold text-white">Voltar ao Início</h2>
+        </div>
+
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl mb-4">
             <Scissors className="h-8 w-8 text-slate-900" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">BarberPro</h1>
-          <p className="text-gray-400">Sistema de Gestão para Barbearias</p>
+          <p className="text-gray-400">Login para Profissionais</p>
         </div>
 
         <Card className="bg-slate-800/50 backdrop-blur-sm border-amber-500/20">
           <CardHeader>
-            <CardTitle className="text-white">Fazer Login</CardTitle>
+            <CardTitle className="text-white">Acesso Profissional</CardTitle>
             <CardDescription className="text-gray-400">
-              Entre com suas credenciais para acessar o sistema
+              Área restrita para Barbeiros, Administradores e Super Admins
             </CardDescription>
           </CardHeader>
           <CardContent>

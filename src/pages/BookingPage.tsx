@@ -5,7 +5,7 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Calendar } from '../components/ui/calendar';
-import { toast } from '../components/ui/use-toast';
+import { toast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { Barbershop, Barber, Service } from '../types';
 import { ArrowLeft } from 'lucide-react';
@@ -51,15 +51,14 @@ const BookingPage: React.FC = () => {
       
       if (error) throw error;
       
-      // Mapear dados do Supabase para o tipo Barbershop
       const mappedBarbershops: Barbershop[] = (data || []).map(item => ({
         id: item.id,
         name: item.name,
         address: item.address,
         phone: item.phone,
         adminId: item.admin_id || '',
-        services: [], // Será carregado separadamente
-        barbers: [], // Será carregado separadamente
+        services: [],
+        barbers: [],
         createdAt: new Date(item.created_at || Date.now())
       }));
       
@@ -76,7 +75,6 @@ const BookingPage: React.FC = () => {
 
   const fetchBarbers = async (barbershopId: string) => {
     try {
-      // Buscar barbeiros através da tabela de relacionamento
       const { data, error } = await supabase
         .from('barber_barbershops')
         .select(`
@@ -87,7 +85,6 @@ const BookingPage: React.FC = () => {
       
       if (error) throw error;
       
-      // Mapear dados para o tipo Barber
       const mappedBarbers: Barber[] = (data || [])
         .filter(item => item.barbers)
         .map(item => ({
@@ -95,15 +92,15 @@ const BookingPage: React.FC = () => {
           name: item.barbers.name,
           email: item.barbers.email,
           phone: item.barbers.phone,
-          barbershops: [barbershopId], // Barbershop atual
+          barbershops: [barbershopId],
           specialties: item.barbers.specialties || [],
-          workingHours: {} // Inicializar vazio por enquanto
+          workingHours: {}
         }));
       
       setBarbers(mappedBarbers);
     } catch (error) {
       console.error('Error fetching barbers:', error);
-      setBarbers([]); // Fallback para array vazio
+      setBarbers([]);
     }
   };
 
@@ -117,7 +114,6 @@ const BookingPage: React.FC = () => {
       
       if (error) throw error;
       
-      // Mapear dados para o tipo Service
       const mappedServices: Service[] = (data || []).map(item => ({
         id: item.id,
         name: item.name,
@@ -129,7 +125,7 @@ const BookingPage: React.FC = () => {
       setServices(mappedServices);
     } catch (error) {
       console.error('Error fetching services:', error);
-      setServices([]); // Fallback para array vazio
+      setServices([]);
     }
   };
 
