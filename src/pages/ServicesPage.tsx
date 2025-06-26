@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Button } from '../components/ui/button';
@@ -9,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from '../components/ui/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { useAuthStore } from '../store/authStore';
-import { Service, Barbershop } from '../types';
+import { Service, Barbershop, DatabaseService, DatabaseBarbershop } from '../types';
+import { transformDatabaseService, transformDatabaseBarbershop } from '../utils/dataTransforms';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
 const ServicesPage: React.FC = () => {
@@ -28,6 +30,7 @@ const ServicesPage: React.FC = () => {
   useEffect(() => {
     if (user?.barbershopId) {
       fetchBarbershop();
+      fetchServices();
     }
   }, [user]);
 
@@ -40,10 +43,33 @@ const ServicesPage: React.FC = () => {
         .single();
       
       if (error) throw error;
-      setBarbershop(data);
-      setServices(data.services || []);
+      
+      const transformedBarbershop = transformDatabaseBarbershop(data as DatabaseBarbershop);
+      setBarbershop(transformedBarbershop);
     } catch (error) {
       console.error('Error fetching barbershop:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar a barbearia",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const fetchServices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .eq('barbershop_id', user?.barbershopId)
+        .order('name');
+      
+      if (error) throw error;
+      
+      const transformedServices = (data as DatabaseService[]).map(transformDatabaseService);
+      setServices(transformedServices);
+    } catch (error) {
+      console.error('Error fetching services:', error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar os serviços",
@@ -55,41 +81,38 @@ const ServicesPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!barbershop) return;
+    if (!user?.barbershopId) return;
     
     try {
-      let updatedServices;
-      
+      const serviceData = {
+        name: formData.name,
+        duration: formData.duration,
+        price: formData.price,
+        description: formData.description || null,
+        barbershop_id: user.barbershopId,
+      };
+
       if (editingService) {
-        updatedServices = services.map(service => 
-          service.id === editingService.id 
-            ? { ...formData, id: editingService.id }
-            : service
-        );
+        const { error } = await supabase
+          .from('services')
+          .update(serviceData)
+          .eq('id', editingService.id);
+        
+        if (error) throw error;
+        toast({ title: "Sucesso!", description: "Serviço atualizado com sucesso" });
       } else {
-        const newService = {
-          ...formData,
-          id: crypto.randomUUID(),
-        };
-        updatedServices = [...services, newService];
+        const { error } = await supabase
+          .from('services')
+          .insert([serviceData]);
+        
+        if (error) throw error;
+        toast({ title: "Sucesso!", description: "Serviço criado com sucesso" });
       }
-      
-      const { error } = await supabase
-        .from('barbershops')
-        .update({ services: updatedServices })
-        .eq('id', barbershop.id);
-      
-      if (error) throw error;
-      
-      setServices(updatedServices);
-      toast({ 
-        title: "Sucesso!", 
-        description: editingService ? "Serviço atualizado com sucesso" : "Serviço criado com sucesso" 
-      });
       
       setIsDialogOpen(false);
       setEditingService(null);
       setFormData({ name: '', duration: 0, price: 0, description: '' });
+      fetchServices();
     } catch (error) {
       console.error('Error saving service:', error);
       toast({
@@ -112,20 +135,18 @@ const ServicesPage: React.FC = () => {
   };
 
   const handleDelete = async (serviceId: string) => {
-    if (!confirm('Tem certeza que deseja excluir este serviço?') || !barbershop) return;
+    if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
     
     try {
-      const updatedServices = services.filter(service => service.id !== serviceId);
-      
       const { error } = await supabase
-        .from('barbershops')
-        .update({ services: updatedServices })
-        .eq('id', barbershop.id);
+        .from('services')
+        .delete()
+        .eq('id', serviceId);
       
       if (error) throw error;
       
-      setServices(updatedServices);
       toast({ title: "Sucesso!", description: "Serviço excluído com sucesso" });
+      fetchServices();
     } catch (error) {
       console.error('Error deleting service:', error);
       toast({

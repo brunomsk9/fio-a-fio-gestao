@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { toast } from '../components/ui/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { useAuthStore } from '../store/authStore';
-import { Booking } from '../types';
+import { Booking, DatabaseBooking } from '../types';
+import { transformDatabaseBooking } from '../utils/dataTransforms';
 import { Calendar, Clock, User, Phone } from 'lucide-react';
 
 const BookingsPage: React.FC = () => {
@@ -40,7 +41,9 @@ const BookingsPage: React.FC = () => {
       const { data, error } = await query.order('date', { ascending: false });
       
       if (error) throw error;
-      setBookings(data || []);
+      
+      const transformedBookings = (data as any[]).map(transformDatabaseBooking);
+      setBookings(transformedBookings);
     } catch (error) {
       console.error('Error fetching bookings:', error);
       toast({
@@ -143,7 +146,7 @@ const BookingsPage: React.FC = () => {
                 
                 <div className="flex items-center gap-2 text-gray-300">
                   <Calendar className="h-4 w-4" />
-                  <span>{new Date(booking.date).toLocaleDateString('pt-BR')}</span>
+                  <span>{booking.date.toLocaleDateString('pt-BR')}</span>
                 </div>
                 
                 <div className="flex items-center gap-2 text-gray-300">

@@ -8,6 +8,7 @@ import { Input } from '../components/ui/input';
 import { toast } from '../components/ui/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { Booking } from '../types';
+import { transformDatabaseBooking } from '../utils/dataTransforms';
 import { Calendar, Clock, MapPin, Phone, Search } from 'lucide-react';
 
 const MyBookingsPage: React.FC = () => {
@@ -36,8 +37,9 @@ const MyBookingsPage: React.FC = () => {
 
       if (error) throw error;
       
-      setBookings(data || []);
-      setFilteredBookings(data || []);
+      const transformedBookings = (data as any[]).map(transformDatabaseBooking);
+      setBookings(transformedBookings);
+      setFilteredBookings(transformedBookings);
     } catch (error) {
       console.error('Error fetching bookings:', error);
       toast({
@@ -142,7 +144,7 @@ const MyBookingsPage: React.FC = () => {
                 <CardContent className="space-y-3">
                   <div className="flex items-center gap-2 text-gray-300">
                     <Calendar className="h-4 w-4" />
-                    <span>{new Date(booking.date).toLocaleDateString('pt-BR')}</span>
+                    <span>{booking.date.toLocaleDateString('pt-BR')}</span>
                   </div>
                   
                   <div className="flex items-center gap-2 text-gray-300">
@@ -172,7 +174,7 @@ const MyBookingsPage: React.FC = () => {
                     </p>
                   </div>
 
-                  {booking.status === 'scheduled' && new Date(booking.date) > new Date() && (
+                  {booking.status === 'scheduled' && booking.date > new Date() && (
                     <Button
                       onClick={() => cancelBooking(booking.id)}
                       variant="outline"

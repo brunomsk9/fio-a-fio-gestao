@@ -9,6 +9,7 @@ import { toast } from '../components/ui/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { useAuthStore } from '../store/authStore';
 import { Booking } from '../types';
+import { transformDatabaseBooking } from '../utils/dataTransforms';
 import { Clock, User, Phone } from 'lucide-react';
 
 const MySchedulePage: React.FC = () => {
@@ -38,7 +39,9 @@ const MySchedulePage: React.FC = () => {
         .order('time');
 
       if (error) throw error;
-      setBookings(data || []);
+      
+      const transformedBookings = (data as any[]).map(transformDatabaseBooking);
+      setBookings(transformedBookings);
     } catch (error) {
       console.error('Error fetching bookings:', error);
       toast({

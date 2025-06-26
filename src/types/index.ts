@@ -35,6 +35,7 @@ export interface Service {
   duration: number; // in minutes
   price: number;
   description?: string;
+  barbershopId?: string;
 }
 
 export interface Booking {
@@ -60,4 +61,50 @@ export interface WorkingHours {
     end: string;
     isWorking: boolean;
   };
+}
+
+// Database row types (snake_case as returned by Supabase)
+export interface DatabaseBarber {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  specialties: string[] | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface DatabaseBarbershop {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  admin_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface DatabaseBooking {
+  id: string;
+  client_name: string;
+  client_phone: string;
+  barber_id: string | null;
+  barbershop_id: string | null;
+  service_id: string | null;
+  date: string;
+  time: string;
+  status: string;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface DatabaseService {
+  id: string;
+  name: string;
+  duration: number;
+  price: number;
+  description: string | null;
+  barbershop_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }

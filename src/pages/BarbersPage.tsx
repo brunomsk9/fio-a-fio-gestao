@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { toast } from '../components/ui/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { useAuthStore } from '../store/authStore';
-import { Barber, Barbershop } from '../types';
+import { Barber, Barbershop, DatabaseBarber, DatabaseBarbershop } from '../types';
+import { transformDatabaseBarber, transformDatabaseBarbershop } from '../utils/dataTransforms';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
 const BarbersPage: React.FC = () => {
@@ -23,7 +24,6 @@ const BarbersPage: React.FC = () => {
     name: '',
     email: '',
     phone: '',
-    barbershops: [] as string[],
     specialties: [] as string[],
   });
 
@@ -37,13 +37,16 @@ const BarbersPage: React.FC = () => {
       let query = supabase.from('barbers').select('*');
       
       if (user?.role === 'admin' && user.barbershopId) {
-        query = query.contains('barbershops', [user.barbershopId]);
+        // For admin users, we'd need to join with barber_barbershops table
+        // For now, just fetch all barbers
       }
       
       const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) throw error;
-      setBarbers(data || []);
+      
+      const transformedBarbers = (data as DatabaseBarber[]).map(transformDatabaseBarber);
+      setBarbers(transformedBarbers);
     } catch (error) {
       console.error('Error fetching barbers:', error);
       toast({
@@ -65,7 +68,9 @@ const BarbersPage: React.FC = () => {
       const { data, error } = await query.order('name');
       
       if (error) throw error;
-      setBarbershops(data || []);
+      
+      const transformedBarbershops = (data as DatabaseBarbershop[]).map(shop => transformDatabaseBarbershop(shop));
+      setBarbershops(transformedBarbershops);
     } catch (error) {
       console.error('Error fetching barbershops:', error);
     }
@@ -75,10 +80,17 @@ const BarbersPage: React.FC = () => {
     e.preventDefault();
     
     try {
+      const barberData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        specialties: formData.specialties,
+      };
+
       if (editingBarber) {
         const { error } = await supabase
           .from('barbers')
-          .update(formData)
+          .update(barberData)
           .eq('id', editingBarber.id);
         
         if (error) throw error;
@@ -86,7 +98,7 @@ const BarbersPage: React.FC = () => {
       } else {
         const { error } = await supabase
           .from('barbers')
-          .insert([formData]);
+          .insert([{ ...barberData, id: crypto.randomUUID() }]);
         
         if (error) throw error;
         toast({ title: "Sucesso!", description: "Barbeiro criado com sucesso" });
@@ -94,7 +106,7 @@ const BarbersPage: React.FC = () => {
       
       setIsDialogOpen(false);
       setEditingBarber(null);
-      setFormData({ name: '', email: '', phone: '', barbershops: [], specialties: [] });
+      setFormData({ name: '', email: '', phone: '', specialties: [] });
       fetchBarbers();
     } catch (error) {
       console.error('Error saving barber:', error);
@@ -112,7 +124,6 @@ const BarbersPage: React.FC = () => {
       name: barber.name,
       email: barber.email,
       phone: barber.phone,
-      barbershops: barber.barbershops,
       specialties: barber.specialties,
     });
     setIsDialogOpen(true);
@@ -223,7 +234,6 @@ const BarbersPage: React.FC = () => {
                   <p><strong>Email:</strong> {barber.email}</p>
                   <p><strong>Telefone:</strong> {barber.phone}</p>
                   <p><strong>Especialidades:</strong> {barber.specialties.join(', ')}</p>
-                  <p><strong>Barbearias:</strong> {barber.barbershops.length}</p>
                 </div>
                 <div className="flex gap-2 mt-4">
                   <Button
