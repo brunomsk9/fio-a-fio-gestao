@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { Barbershop } from '../types';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, Phone, Users, Scissors } from 'lucide-react';
 
 const BarbershopsPage: React.FC = () => {
   const [barbershops, setBarbershops] = useState<Barbershop[]>([]);
@@ -33,14 +33,43 @@ const BarbershopsPage: React.FC = () => {
       console.log('Conectando com Supabase...');
       const { data, error } = await supabase
         .from('barbershops')
-        .select('*')
+        .select(`
+          *,
+          barber_barbershops!inner(
+            barber_id,
+            barbers(name, email, phone, specialties)
+          ),
+          services(id, name, price, duration)
+        `)
         .order('created_at', { ascending: false });
       
       console.log('Resposta do Supabase:', { data, error });
       
       if (error) {
         console.error('Erro na consulta:', error);
-        throw error;
+        // Fallback para busca simples se a consulta com JOIN falhar
+        const { data: simpleData, error: simpleError } = await supabase
+          .from('barbershops')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (simpleError) {
+          throw simpleError;
+        }
+        
+        const mappedBarbershops: Barbershop[] = (simpleData || []).map(item => ({
+          id: item.id,
+          name: item.name,
+          address: item.address,
+          phone: item.phone,
+          adminId: item.admin_id || '',
+          services: [],
+          barbers: [],
+          createdAt: new Date(item.created_at || Date.now())
+        }));
+        
+        setBarbershops(mappedBarbershops);
+        return;
       }
       
       console.log('Barbearias encontradas:', data?.length || 0);
@@ -52,8 +81,8 @@ const BarbershopsPage: React.FC = () => {
         address: item.address,
         phone: item.phone,
         adminId: item.admin_id || '',
-        services: [], // Inicializar como array vazio por enquanto
-        barbers: [], // Inicializar como array vazio por enquanto
+        services: item.services || [],
+        barbers: item.barber_barbershops?.map((bb: any) => bb.barbers).filter(Boolean) || [],
         createdAt: new Date(item.created_at || Date.now())
       }));
       
@@ -148,12 +177,12 @@ const BarbershopsPage: React.FC = () => {
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900">
+              <Button className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white">
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Barbearia
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-800 border-amber-500/20">
+            <DialogContent className="bg-gray-800 border-orange-500/20">
               <DialogHeader>
                 <DialogTitle className="text-white">
                   {editingBarbershop ? 'Editar Barbearia' : 'Nova Barbearia'}
@@ -166,7 +195,7 @@ const BarbershopsPage: React.FC = () => {
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="bg-slate-700 border-slate-600 text-white"
+                    className="bg-gray-700 border-gray-600 text-white"
                     required
                   />
                 </div>
@@ -176,7 +205,7 @@ const BarbershopsPage: React.FC = () => {
                     id="address"
                     value={formData.address}
                     onChange={(e) => setFormData({...formData, address: e.target.value})}
-                    className="bg-slate-700 border-slate-600 text-white"
+                    className="bg-gray-700 border-gray-600 text-white"
                     required
                   />
                 </div>
@@ -186,11 +215,11 @@ const BarbershopsPage: React.FC = () => {
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="bg-slate-700 border-slate-600 text-white"
+                    className="bg-gray-700 border-gray-600 text-white"
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900">
+                <Button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white">
                   {editingBarbershop ? 'Atualizar' : 'Criar'} Barbearia
                 </Button>
               </form>
@@ -204,6 +233,7 @@ const BarbershopsPage: React.FC = () => {
           </div>
         ) : barbershops.length === 0 ? (
           <div className="text-center py-12">
+            <Scissors className="h-16 w-16 text-orange-400 mx-auto mb-4" />
             <h3 className="text-xl text-white mb-2">Nenhuma barbearia encontrada</h3>
             <p className="text-gray-400 mb-4">
               Parece que o banco de dados ainda não foi configurado ou não há barbearias cadastradas.
@@ -215,23 +245,38 @@ const BarbershopsPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {barbershops.map((barbershop) => (
-              <Card key={barbershop.id} className="bg-slate-800/50 border-amber-500/20">
+              <Card key={barbershop.id} className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 border-orange-500/20 hover:border-orange-400/40 transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="text-white">{barbershop.name}</CardTitle>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Scissors className="h-5 w-5 text-orange-400" />
+                    {barbershop.name}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2 text-gray-300">
-                    <p><strong>Endereço:</strong> {barbershop.address}</p>
-                    <p><strong>Telefone:</strong> {barbershop.phone}</p>
-                    <p><strong>Barbeiros:</strong> {barbershop.barbers?.length || 0}</p>
-                    <p><strong>Serviços:</strong> {barbershop.services?.length || 0}</p>
+                  <div className="space-y-3 text-gray-300">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-orange-400" />
+                      <span className="text-sm">{barbershop.address}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-orange-400" />
+                      <span className="text-sm">{barbershop.phone}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-orange-400" />
+                      <span className="text-sm">{barbershop.barbers?.length || 0} Barbeiros</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Scissors className="h-4 w-4 text-orange-400" />
+                      <span className="text-sm">{barbershop.services?.length || 0} Serviços</span>
+                    </div>
                   </div>
                   <div className="flex gap-2 mt-4">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(barbershop)}
-                      className="border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
+                      className="border-orange-500/50 text-orange-400 hover:bg-orange-500/20"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
