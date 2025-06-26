@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { Button } from './ui/button';
 import { cn } from '../lib/utils';
@@ -41,9 +42,14 @@ const menuItems = {
 
 export const Sidebar: React.FC = () => {
   const { user } = useAuthStore();
-  const [activeItem, setActiveItem] = React.useState('/');
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const items = menuItems[user?.role as keyof typeof menuItems] || [];
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
 
   return (
     <div className="w-64 bg-slate-900/90 backdrop-blur-sm border-r border-amber-500/20 h-screen">
@@ -61,17 +67,18 @@ export const Sidebar: React.FC = () => {
         <nav className="space-y-2">
           {items.map((item) => {
             const Icon = item.icon;
+            const isActive = location.pathname === item.path;
             return (
               <Button
                 key={item.path}
                 variant="ghost"
                 className={cn(
                   "w-full justify-start text-left font-medium transition-all duration-200",
-                  activeItem === item.path
+                  isActive
                     ? "bg-amber-500/20 text-amber-400 border-r-2 border-amber-500"
                     : "text-gray-300 hover:text-white hover:bg-slate-800/50"
                 )}
-                onClick={() => setActiveItem(item.path)}
+                onClick={() => handleNavigation(item.path)}
               >
                 <Icon className="mr-3 h-5 w-5" />
                 {item.label}

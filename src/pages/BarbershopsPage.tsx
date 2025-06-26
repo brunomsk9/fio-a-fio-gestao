@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Button } from '../components/ui/button';
@@ -7,7 +6,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { toast } from '../components/ui/use-toast';
+import { toast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { Barbershop } from '../types';
 import { Plus, Edit, Trash2 } from 'lucide-react';
@@ -253,7 +252,73 @@ const BarbershopsPage: React.FC = () => {
       </div>
     </Layout>
   );
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    
+    try {
+      if (editingBarbershop) {
+        const { error } = await supabase
+          .from('barbershops')
+          .update(formData)
+          .eq('id', editingBarbershop.id);
+        
+        if (error) throw error;
+        toast({ title: "Sucesso!", description: "Barbearia atualizada com sucesso" });
+      } else {
+        const { error } = await supabase
+          .from('barbershops')
+          .insert([formData]);
+        
+        if (error) throw error;
+        toast({ title: "Sucesso!", description: "Barbearia criada com sucesso" });
+      }
+      
+      setIsDialogOpen(false);
+      setEditingBarbershop(null);
+      setFormData({ name: '', address: '', phone: '' });
+      fetchBarbershops();
+    } catch (error) {
+      console.error('Error saving barbershop:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar a barbearia",
+        variant: "destructive"
+      });
+    }
+  }
+
+  function handleEdit(barbershop: Barbershop) {
+    setEditingBarbershop(barbershop);
+    setFormData({
+      name: barbershop.name,
+      address: barbershop.address,
+      phone: barbershop.phone,
+    });
+    setIsDialogOpen(true);
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Tem certeza que deseja excluir esta barbearia?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('barbershops')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      toast({ title: "Sucesso!", description: "Barbearia excluída com sucesso" });
+      fetchBarbershops();
+    } catch (error) {
+      console.error('Error deleting barbershop:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir a barbearia",
+        variant: "destructive"
+      });
+    }
+  }
 };
 
 export default BarbershopsPage;
-
