@@ -16,8 +16,8 @@ export const transformDatabaseBarber = (dbBarber: DatabaseBarber): Barber => ({
   email: dbBarber.email,
   phone: dbBarber.phone,
   specialties: dbBarber.specialties || [],
-  barbershops: [], // Will be populated from barber_barbershops table if needed
-  workingHours: {} // Will be populated from working_hours table if needed
+  barbershops: [], // Will be populated if needed
+  workingHours: {} // Will be populated if needed
 });
 
 export const transformDatabaseBarbershop = (dbBarbershop: DatabaseBarbershop, services: Service[] = []): Barbershop => ({
@@ -27,8 +27,8 @@ export const transformDatabaseBarbershop = (dbBarbershop: DatabaseBarbershop, se
   phone: dbBarbershop.phone,
   adminId: dbBarbershop.admin_id || '',
   services: services,
-  barbers: [], // Will be populated from barber_barbershops table if needed
-  createdAt: new Date(dbBarbershop.created_at || '')
+  barbers: [], // Will be populated if needed
+  createdAt: new Date(dbBarbershop.created_at || Date.now())
 });
 
 export const transformDatabaseBooking = (dbBooking: DatabaseBooking & { 
@@ -45,7 +45,7 @@ export const transformDatabaseBooking = (dbBooking: DatabaseBooking & {
   date: new Date(dbBooking.date),
   time: dbBooking.time,
   status: dbBooking.status as 'scheduled' | 'completed' | 'cancelled',
-  createdAt: new Date(dbBooking.created_at || ''),
+  createdAt: new Date(dbBooking.created_at || Date.now()),
   barber: dbBooking.barber ? transformDatabaseBarber(dbBooking.barber) : undefined,
   barbershop: dbBooking.barbershop ? transformDatabaseBarbershop(dbBooking.barbershop) : undefined,
   service: dbBooking.service ? transformDatabaseService(dbBooking.service) : undefined

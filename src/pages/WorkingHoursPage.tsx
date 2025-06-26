@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Switch } from '../components/ui/switch';
-import { toast } from '../components/ui/use-toast';
+import { toast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { useAuthStore } from '../store/authStore';
 import { WorkingHours } from '../types';
@@ -49,7 +49,6 @@ const WorkingHoursPage: React.FC = () => {
       if (error) throw error;
       
       if (data && data.length > 0) {
-        // Convert database format to our WorkingHours type
         const hoursData: WorkingHours = {};
         
         data.forEach((item) => {
@@ -60,7 +59,6 @@ const WorkingHoursPage: React.FC = () => {
           };
         });
 
-        // Fill in any missing days with defaults
         Object.keys(dayNames).forEach((day) => {
           if (!hoursData[day]) {
             hoursData[day] = { start: '09:00', end: '18:00', isWorking: false };
@@ -78,16 +76,14 @@ const WorkingHoursPage: React.FC = () => {
     if (!user || user.role !== 'barber') return;
 
     try {
-      // Delete existing working hours for this barber
       await supabase
         .from('working_hours')
         .delete()
         .eq('barber_id', user.id);
 
-      // Insert new working hours
       const workingHoursData = Object.entries(workingHours).map(([day, hours]) => ({
         barber_id: user.id,
-        barbershop_id: user.barbershopId, // Assuming barber has a barbershop
+        barbershop_id: user.barbershopId,
         day_of_week: day,
         start_time: hours.isWorking ? hours.start : null,
         end_time: hours.isWorking ? hours.end : null,
