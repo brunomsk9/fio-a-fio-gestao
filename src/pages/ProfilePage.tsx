@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { toast } from '../components/ui/use-toast';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../integrations/supabase/client';
 import { useAuthStore } from '../store/authStore';
 
 const ProfilePage: React.FC = () => {

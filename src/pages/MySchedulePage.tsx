@@ -6,7 +6,7 @@ import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Calendar } from '../components/ui/calendar';
 import { toast } from '../components/ui/use-toast';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../integrations/supabase/client';
 import { useAuthStore } from '../store/authStore';
 import { Booking } from '../types';
 import { Clock, User, Phone } from 'lucide-react';
