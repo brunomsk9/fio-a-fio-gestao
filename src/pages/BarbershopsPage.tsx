@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Button } from '../components/ui/button';
@@ -44,7 +45,20 @@ const BarbershopsPage: React.FC = () => {
       }
       
       console.log('Barbearias encontradas:', data?.length || 0);
-      setBarbershops(data || []);
+      
+      // Mapeando os dados do Supabase para o tipo Barbershop
+      const mappedBarbershops: Barbershop[] = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        address: item.address,
+        phone: item.phone,
+        adminId: item.admin_id || '',
+        services: [], // Inicializar como array vazio por enquanto
+        barbers: [], // Inicializar como array vazio por enquanto
+        createdAt: new Date(item.created_at || Date.now())
+      }));
+      
+      setBarbershops(mappedBarbershops);
     } catch (error) {
       console.error('Erro ao buscar barbearias:', error);
       toast({
@@ -242,3 +256,4 @@ const BarbershopsPage: React.FC = () => {
 };
 
 export default BarbershopsPage;
+
