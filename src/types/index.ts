@@ -48,6 +48,10 @@ export interface Booking {
   time: string;
   status: 'scheduled' | 'completed' | 'cancelled';
   createdAt: Date;
+  // Optional joined data from Supabase queries
+  barber?: Barber;
+  barbershop?: Barbershop;
+  service?: Service;
 }
 
 export interface WorkingHours {

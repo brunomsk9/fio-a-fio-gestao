@@ -153,13 +153,13 @@ const BookingsPage: React.FC = () => {
 
                 <div className="pt-2 border-t border-slate-600">
                   <p className="text-sm text-gray-400">
-                    <strong>Serviço:</strong> {booking.service?.name}
+                    <strong>Serviço:</strong> {booking.service?.name || 'N/A'}
                   </p>
                   <p className="text-sm text-gray-400">
-                    <strong>Barbeiro:</strong> {booking.barber?.name}
+                    <strong>Barbeiro:</strong> {booking.barber?.name || 'N/A'}
                   </p>
                   <p className="text-sm text-gray-400">
-                    <strong>Barbearia:</strong> {booking.barbershop?.name}
+                    <strong>Barbearia:</strong> {booking.barbershop?.name || 'N/A'}
                   </p>
                 </div>
 

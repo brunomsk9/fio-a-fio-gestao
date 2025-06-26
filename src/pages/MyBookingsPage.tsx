@@ -157,18 +157,18 @@ const MyBookingsPage: React.FC = () => {
 
                   <div className="flex items-center gap-2 text-gray-300">
                     <MapPin className="h-4 w-4" />
-                    <span>{booking.barbershop?.name}</span>
+                    <span>{booking.barbershop?.name || 'N/A'}</span>
                   </div>
 
                   <div className="pt-2 border-t border-slate-600">
                     <p className="text-sm text-gray-400">
-                      <strong>Serviço:</strong> {booking.service?.name}
+                      <strong>Serviço:</strong> {booking.service?.name || 'N/A'}
                     </p>
                     <p className="text-sm text-gray-400">
-                      <strong>Barbeiro:</strong> {booking.barber?.name}
+                      <strong>Barbeiro:</strong> {booking.barber?.name || 'N/A'}
                     </p>
                     <p className="text-sm text-gray-400">
-                      <strong>Preço:</strong> R$ {booking.service?.price}
+                      <strong>Preço:</strong> R$ {booking.service?.price || 0}
                     </p>
                   </div>
 

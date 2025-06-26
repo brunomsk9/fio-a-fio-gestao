@@ -151,10 +151,10 @@ const MySchedulePage: React.FC = () => {
                             <span>{booking.clientPhone}</span>
                           </div>
                           <p className="text-sm text-gray-400">
-                            <strong>Serviço:</strong> {booking.service?.name} - R$ {booking.service?.price}
+                            <strong>Serviço:</strong> {booking.service?.name || 'N/A'} - R$ {booking.service?.price || 0}
                           </p>
                           <p className="text-sm text-gray-400">
-                            <strong>Barbearia:</strong> {booking.barbershop?.name}
+                            <strong>Barbearia:</strong> {booking.barbershop?.name || 'N/A'}
                           </p>
                         </div>
 
