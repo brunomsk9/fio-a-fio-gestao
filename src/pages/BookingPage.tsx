@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -7,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Calendar } from '../components/ui/calendar';
 import { toast } from '../components/ui/use-toast';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../integrations/supabase/client';
 import { Barbershop, Barber, Service } from '../types';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
