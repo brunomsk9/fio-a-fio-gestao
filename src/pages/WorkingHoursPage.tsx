@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -41,15 +42,32 @@ const WorkingHoursPage: React.FC = () => {
 
     try {
       const { data, error } = await supabase
-        .from('barbers')
-        .select('working_hours')
-        .eq('id', user.id)
-        .single();
+        .from('working_hours')
+        .select('*')
+        .eq('barber_id', user.id);
 
       if (error) throw error;
       
-      if (data.working_hours) {
-        setWorkingHours(data.working_hours);
+      if (data && data.length > 0) {
+        // Convert database format to our WorkingHours type
+        const hoursData: WorkingHours = {};
+        
+        data.forEach((item) => {
+          hoursData[item.day_of_week] = {
+            start: item.start_time || '09:00',
+            end: item.end_time || '18:00',
+            isWorking: item.is_working || false
+          };
+        });
+
+        // Fill in any missing days with defaults
+        Object.keys(dayNames).forEach((day) => {
+          if (!hoursData[day]) {
+            hoursData[day] = { start: '09:00', end: '18:00', isWorking: false };
+          }
+        });
+
+        setWorkingHours(hoursData);
       }
     } catch (error) {
       console.error('Error fetching working hours:', error);
@@ -60,10 +78,25 @@ const WorkingHoursPage: React.FC = () => {
     if (!user || user.role !== 'barber') return;
 
     try {
+      // Delete existing working hours for this barber
+      await supabase
+        .from('working_hours')
+        .delete()
+        .eq('barber_id', user.id);
+
+      // Insert new working hours
+      const workingHoursData = Object.entries(workingHours).map(([day, hours]) => ({
+        barber_id: user.id,
+        barbershop_id: user.barbershopId, // Assuming barber has a barbershop
+        day_of_week: day,
+        start_time: hours.isWorking ? hours.start : null,
+        end_time: hours.isWorking ? hours.end : null,
+        is_working: hours.isWorking
+      }));
+
       const { error } = await supabase
-        .from('barbers')
-        .update({ working_hours: workingHours })
-        .eq('id', user.id);
+        .from('working_hours')
+        .insert(workingHoursData);
 
       if (error) throw error;
       
