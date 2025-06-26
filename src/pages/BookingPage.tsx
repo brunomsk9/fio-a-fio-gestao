@@ -50,7 +50,20 @@ const BookingPage: React.FC = () => {
         .order('name');
       
       if (error) throw error;
-      setBarbershops(data || []);
+      
+      // Mapear dados do Supabase para o tipo Barbershop
+      const mappedBarbershops: Barbershop[] = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        address: item.address,
+        phone: item.phone,
+        adminId: item.admin_id || '',
+        services: [], // Será carregado separadamente
+        barbers: [], // Será carregado separadamente
+        createdAt: new Date(item.created_at || Date.now())
+      }));
+      
+      setBarbershops(mappedBarbershops);
     } catch (error) {
       console.error('Error fetching barbershops:', error);
       toast({
@@ -63,31 +76,60 @@ const BookingPage: React.FC = () => {
 
   const fetchBarbers = async (barbershopId: string) => {
     try {
+      // Buscar barbeiros através da tabela de relacionamento
       const { data, error } = await supabase
-        .from('barbers')
-        .select('*')
-        .contains('barbershops', [barbershopId])
-        .order('name');
+        .from('barber_barbershops')
+        .select(`
+          barber_id,
+          barbers (*)
+        `)
+        .eq('barbershop_id', barbershopId);
       
       if (error) throw error;
-      setBarbers(data || []);
+      
+      // Mapear dados para o tipo Barber
+      const mappedBarbers: Barber[] = (data || [])
+        .filter(item => item.barbers)
+        .map(item => ({
+          id: item.barbers.id,
+          name: item.barbers.name,
+          email: item.barbers.email,
+          phone: item.barbers.phone,
+          barbershops: [barbershopId], // Barbershop atual
+          specialties: item.barbers.specialties || [],
+          workingHours: {} // Inicializar vazio por enquanto
+        }));
+      
+      setBarbers(mappedBarbers);
     } catch (error) {
       console.error('Error fetching barbers:', error);
+      setBarbers([]); // Fallback para array vazio
     }
   };
 
   const fetchServices = async (barbershopId: string) => {
     try {
       const { data, error } = await supabase
-        .from('barbershops')
-        .select('services')
-        .eq('id', barbershopId)
-        .single();
+        .from('services')
+        .select('*')
+        .eq('barbershop_id', barbershopId)
+        .order('name');
       
       if (error) throw error;
-      setServices(data?.services || []);
+      
+      // Mapear dados para o tipo Service
+      const mappedServices: Service[] = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        duration: item.duration,
+        price: item.price,
+        description: item.description || undefined
+      }));
+      
+      setServices(mappedServices);
     } catch (error) {
       console.error('Error fetching services:', error);
+      setServices([]); // Fallback para array vazio
     }
   };
 
