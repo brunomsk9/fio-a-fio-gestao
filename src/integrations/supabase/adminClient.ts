@@ -9,14 +9,14 @@ const SUPABASE_URL = "https://snnfsakkoauungkprbkr.supabase.co";
 
 // ⚠️ IMPORTANTE: Configure sua Service Role Key
 // Opção 1: Variável de ambiente (recomendado)
-const SUPABASE_SERVICE_ROLE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || "SUA_SERVICE_ROLE_KEY_AQUI";
+const SUPABASE_SERVICE_ROLE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNubmZzYWtrb2F1dW5na3ByYmtyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDk0NDcwMSwiZXhwIjoyMDY2NTIwNzAxfQ.kmBrJ_5kBySyvFIHizVO4IRxbqFQbDrNJmTKW6KOoq0";
 
 // Opção 2: Configuração direta (apenas para desenvolvimento)
 // Substitua a linha acima por:
 // const SUPABASE_SERVICE_ROLE_KEY = "sua_service_role_key_real_aqui";
 
 // Verificação de segurança
-if (!SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_ROLE_KEY === "SUA_SERVICE_ROLE_KEY_AQUI") {
+if (!SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_ROLE_KEY === "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNubmZzYWtrb2F1dW5na3ByYmtyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDk0NDcwMSwiZXhwIjoyMDY2NTIwNzAxfQ.kmBrJ_5kBySyvFIHizVO4IRxbqFQbDrNJmTKW6KOoq0") {
   console.warn(`
     ⚠️ SERVICE ROLE KEY NÃO CONFIGURADA!
     
@@ -52,7 +52,7 @@ export const createUserWithAuth = async (userData: {
   barbershopId?: string;
 }) => {
   // Verificar se a service role key está configurada
-  if (!SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_ROLE_KEY === "SUA_SERVICE_ROLE_KEY_AQUI") {
+  if (!SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_ROLE_KEY === "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNubmZzYWtrb2F1dW5na3ByYmtyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDk0NDcwMSwiZXhwIjoyMDY2NTIwNzAxfQ.kmBrJ_5kBySyvFIHizVO4IRxbqFQbDrNJmTKW6KOoq0") {
     return {
       success: false,
       error: "Service Role Key não configurada. Veja as instruções no console.",
