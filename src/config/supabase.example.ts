@@ -4,10 +4,10 @@
 // URLs e chaves do Supabase
 export const SUPABASE_CONFIG = {
   // URL do projeto (pública)
-  URL: "https://seu-projeto.supabase.co",
+  URL: import.meta.env.VITE_SUPABASE_URL || "https://seu-projeto.supabase.co",
   
   // Chave pública (anon) - pode ser exposta no frontend
-  ANON_KEY: "sua_anon_key_aqui",
+  ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || "sua_anon_key_aqui",
   
   // Chave de serviço (service_role) - NUNCA exponha no frontend público!
   // ⚠️ Use apenas para desenvolvimento local ou em backends seguros
@@ -28,7 +28,6 @@ export const validateServiceRoleKey = () => {
       2. Copie a "service_role" key
       3. Crie um arquivo .env.local na raiz do projeto:
          VITE_SUPABASE_SERVICE_ROLE_KEY=sua_chave_aqui
-      4. Ou configure diretamente neste arquivo (apenas para desenvolvimento)
       
       ⚠️ NUNCA commite a service role key no Git!
     `);
