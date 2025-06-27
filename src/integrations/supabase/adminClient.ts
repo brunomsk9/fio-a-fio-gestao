@@ -114,7 +114,7 @@ export const createUserWithAuth = async (userData: {
 // Função para deletar usuário completo
 export const deleteUserWithAuth = async (userId: string) => {
   // Verificar se a service role key está configurada
-  if (SUPABASE_SERVICE_ROLE_KEY === "SUA_SERVICE_ROLE_KEY_AQUI") {
+  if (SUPABASE_SERVICE_ROLE_KEY === "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNubmZzYWtrb2F1dW5na3ByYmtyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDk0NDcwMSwiZXhwIjoyMDY2NTIwNzAxfQ.kmBrJ_5kBySyvFIHizVO4IRxbqFQbDrNJmTKW6KOoq0") {
     return {
       success: false,
       error: "Service Role Key não configurada. Veja as instruções no console.",
