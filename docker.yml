@@ -1,30 +1,35 @@
+# Dockerfile para deploy da aplicação de barbearia
 FROM node:18-alpine as build
 
+# Definir diretório de trabalho
 WORKDIR /app
 
-# Copia apenas os arquivos de dependências primeiro
+# Copiar arquivos de dependências
 COPY fio-a-fio-gestao/package*.json fio-a-fio-gestao/bun.lockb ./fio-a-fio-gestao/
 
-# Copia o restante do código
+# Copiar código fonte
 COPY fio-a-fio-gestao ./fio-a-fio-gestao
 
-# Vai para a subpasta do projeto
+# Vai para a subpasta
 WORKDIR /app/fio-a-fio-gestao
 
-# Instala as dependências
+# Instalar dependências
 RUN npm install
 
-# Builda o projeto
+# Build da aplicação
 RUN npm run build
 
 # Estágio de produção com Nginx
 FROM nginx:alpine
 
-# Copia os arquivos buildados para o Nginx
+# Copiar arquivos buildados
 COPY --from=build /app/fio-a-fio-gestao/dist /usr/share/nginx/html
 
-# Copia a configuração do Nginx
+# Copiar configuração do Nginx
 COPY fio-a-fio-gestao/nginx.conf /etc/nginx/nginx.conf
 
+# Expor porta 80
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+
+# Comando para iniciar Nginx
+CMD ["nginx", "-g", "daemon off;"] 
