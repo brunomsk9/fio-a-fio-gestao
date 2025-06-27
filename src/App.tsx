@@ -18,6 +18,7 @@ import MyReportsPage from "./pages/MyReportsPage";
 import MyBookingsPage from "./pages/MyBookingsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
+import UsersPage from "./pages/UsersPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/my-bookings" element={<MyBookingsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/users" element={<UsersPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

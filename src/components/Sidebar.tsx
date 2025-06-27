@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -12,12 +11,14 @@ import {
   BarChart3, 
   Settings,
   Clock,
-  User
+  User,
+  UserPlus
 } from 'lucide-react';
 
 const menuItems = {
   'super-admin': [
     { icon: Building2, label: 'Barbearias', path: '/barbershops' },
+    { icon: UserPlus, label: 'Usuários', path: '/users' },
     { icon: BarChart3, label: 'Relatórios Gerais', path: '/reports' },
     { icon: Settings, label: 'Configurações', path: '/settings' },
   ],

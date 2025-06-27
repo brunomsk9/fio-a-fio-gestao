@@ -5,6 +5,7 @@ export interface User {
   phone: string;
   role: 'super-admin' | 'admin' | 'barber' | 'client';
   barbershopId?: string;
+  barbershop?: Barbershop;
 }
 
 export interface Barbershop {
