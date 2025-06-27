@@ -1,30 +1,29 @@
-
 import React from 'react';
-import { useAuthStore } from '../store/authStore';
-import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { Sidebar } from './Sidebar';
+import { useIsMobile } from '../hooks/use-mobile';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user } = useAuthStore();
-
-  if (!user) {
-    return <>{children}</>;
-  }
+  const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="flex">
+    <div className="min-h-screen gradient-bg">
+      <Header />
+      
+      <div className="flex pt-16">
         <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 p-6">
-            {children}
-          </main>
-        </div>
+        
+        <main className={`flex-1 ${isMobile ? 'w-full' : 'ml-64'}`}>
+          <div className="p-8 max-w-7xl mx-auto">
+            <div className="space-y-6">
+              {children}
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );

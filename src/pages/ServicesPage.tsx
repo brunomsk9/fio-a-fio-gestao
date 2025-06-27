@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Button } from '../components/ui/button';
@@ -173,64 +172,90 @@ const ServicesPage: React.FC = () => {
                 Novo Serviço
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-800 border-amber-500/20">
-              <DialogHeader>
+            <DialogContent className="bg-slate-800 border-amber-500/20 max-h-[90vh] overflow-hidden flex flex-col">
+              <DialogHeader className="flex-shrink-0">
                 <DialogTitle className="text-white">
                   {editingService ? 'Editar Serviço' : 'Novo Serviço'}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name" className="text-white">Nome do Serviço</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="bg-slate-700 border-slate-600 text-white"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+              
+              <div className="flex-1 overflow-y-auto pr-2">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="duration" className="text-white">Duração (min)</Label>
+                    <Label htmlFor="name" className="text-white">Nome do Serviço</Label>
                     <Input
-                      id="duration"
-                      type="number"
-                      value={formData.duration}
-                      onChange={(e) => setFormData({...formData, duration: parseInt(e.target.value)})}
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
                       className="bg-slate-700 border-slate-600 text-white"
                       required
-                      min="1"
                     />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="duration" className="text-white">Duração (min)</Label>
+                      <Input
+                        id="duration"
+                        type="number"
+                        value={formData.duration}
+                        onChange={(e) => setFormData({...formData, duration: parseInt(e.target.value)})}
+                        className="bg-slate-700 border-slate-600 text-white"
+                        required
+                        min="1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="price" className="text-white">Preço (R$)</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        step="0.01"
+                        value={formData.price}
+                        onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})}
+                        className="bg-slate-700 border-slate-600 text-white"
+                        required
+                        min="0"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <Label htmlFor="price" className="text-white">Preço (R$)</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      step="0.01"
-                      value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})}
+                    <Label htmlFor="description" className="text-white">Descrição</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
                       className="bg-slate-700 border-slate-600 text-white"
-                      required
-                      min="0"
+                      rows={3}
                     />
                   </div>
-                </div>
-                <div>
-                  <Label htmlFor="description" className="text-white">Descrição</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="bg-slate-700 border-slate-600 text-white"
-                    rows={3}
-                  />
-                </div>
-                <Button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900">
+                </form>
+              </div>
+              
+              {/* Botões fixos na parte inferior */}
+              <div className="flex justify-end space-x-2 pt-4 border-t border-slate-600 flex-shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsDialogOpen(false);
+                    setEditingService(null);
+                    setFormData({ name: '', duration: 0, price: 0, description: '' });
+                  }}
+                  className="border-slate-600 text-white hover:bg-slate-700"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSubmit(e as any);
+                  }}
+                  className="bg-amber-500 hover:bg-amber-600 text-slate-900"
+                >
                   {editingService ? 'Atualizar' : 'Criar'} Serviço
                 </Button>
-              </form>
+              </div>
             </DialogContent>
           </Dialog>
         </div>

@@ -40,58 +40,58 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="flex items-center gap-4 mb-6">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate('/')}
-            className="text-white hover:bg-amber-500/20"
+            className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h2 className="text-2xl font-bold text-white">Voltar ao Início</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Voltar ao Início</h2>
         </div>
 
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl mb-4">
-            <Scissors className="h-8 w-8 text-slate-900" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mb-4 shadow-medium">
+            <Scissors className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">BarberPro</h1>
-          <p className="text-gray-400">Login para Profissionais</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">BarberPro</h1>
+          <p className="text-gray-600">Login para Profissionais</p>
         </div>
 
-        <Card className="bg-slate-800/50 backdrop-blur-sm border-amber-500/20">
+        <Card className="gradient-card shadow-medium border-gray-200">
           <CardHeader>
-            <CardTitle className="text-white">Acesso Profissional</CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardTitle className="text-gray-900">Acesso Profissional</CardTitle>
+            <CardDescription className="text-gray-600">
               Área restrita para Barbeiros, Administradores e Super Admins
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white">Email</Label>
+                <Label htmlFor="email" className="text-gray-700">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-slate-700/50 border-amber-500/30 text-white placeholder:text-gray-400"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   placeholder="seu@email.com"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white">Senha</Label>
+                <Label htmlFor="password" className="text-gray-700">Senha</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-slate-700/50 border-amber-500/30 text-white placeholder:text-gray-400 pr-10"
+                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500 pr-10"
                     placeholder="••••••••"
                     required
                   />
@@ -99,7 +99,7 @@ export const LoginForm: React.FC = () => {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white"
+                    className="absolute right-0 top-0 h-full px-3 text-gray-500 hover:text-gray-700"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -108,7 +108,7 @@ export const LoginForm: React.FC = () => {
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-900 font-semibold"
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold shadow-medium"
                 disabled={isLoading}
               >
                 {isLoading ? 'Entrando...' : 'Entrar'}
@@ -117,12 +117,12 @@ export const LoginForm: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/30 backdrop-blur-sm border-amber-500/10">
+        <Card className="bg-gray-50 border-gray-200 shadow-soft">
           <CardHeader>
-            <CardTitle className="text-sm text-white">Informações</CardTitle>
+            <CardTitle className="text-sm text-gray-900">Informações</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-600">
               Use as credenciais do usuário que você cadastrou no Supabase.
               Certifique-se de que o usuário existe tanto na autenticação quanto na tabela users.
             </p>

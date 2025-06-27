@@ -93,6 +93,22 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         barbershopId: userData.barbershop_id || undefined,
       };
 
+      // Se for admin, buscar as barbearias que ele é responsável
+      if (userData.role === 'admin') {
+        try {
+          const { data: adminBarbershops, error: barbershopError } = await supabase
+            .from('barbershops')
+            .select('id, name')
+            .eq('admin_id', userData.id);
+
+          if (!barbershopError && adminBarbershops) {
+            user.barbershops = adminBarbershops;
+          }
+        } catch (error) {
+          console.error('Erro ao buscar barbearias do admin:', error);
+        }
+      }
+
       set({ user, isAuthenticated: true, isLoading: false });
     } catch (error) {
       console.error('Erro no login:', error);
@@ -155,6 +171,22 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         role: userData.role as any,
         barbershopId: userData.barbershop_id || undefined,
       };
+
+      // Se for admin, buscar as barbearias que ele é responsável
+      if (userData.role === 'admin') {
+        try {
+          const { data: adminBarbershops, error: barbershopError } = await supabase
+            .from('barbershops')
+            .select('id, name')
+            .eq('admin_id', userData.id);
+
+          if (!barbershopError && adminBarbershops) {
+            user.barbershops = adminBarbershops;
+          }
+        } catch (error) {
+          console.error('Erro ao buscar barbearias do admin:', error);
+        }
+      }
 
       set({ user, isAuthenticated: true, isLoading: false });
     } catch (error) {
