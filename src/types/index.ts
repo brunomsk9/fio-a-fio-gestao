@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -14,6 +13,7 @@ export interface Barbershop {
   address: string;
   phone: string;
   adminId: string;
+  admin?: User;
   services: Service[];
   barbers: string[];
   createdAt: Date;
