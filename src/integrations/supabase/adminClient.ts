@@ -4,36 +4,28 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
+import { SUPABASE_CONFIG, SECURITY_CONFIG, ERROR_MESSAGES } from '../../config/supabase';
 
-const SUPABASE_URL = "https://snnfsakkoauungkprbkr.supabase.co";
-
-// ⚠️ IMPORTANTE: Configure sua Service Role Key
-// Opção 1: Variável de ambiente (recomendado)
-const SUPABASE_SERVICE_ROLE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNubmZzYWtrb2F1dW5na3ByYmtyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDk0NDcwMSwiZXhwIjoyMDY2NTIwNzAxfQ.kmBrJ_5kBySyvFIHizVO4IRxbqFQbDrNJmTKW6KOoq0";
-
-// Opção 2: Configuração direta (apenas para desenvolvimento)
-// Substitua a linha acima por:
-// const SUPABASE_SERVICE_ROLE_KEY = "sua_service_role_key_real_aqui";
-
-// Verificação de segurança
-if (!SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_ROLE_KEY === "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNubmZzYWtrb2F1dW5na3ByYmtyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDk0NDcwMSwiZXhwIjoyMDY2NTIwNzAxfQ.kmBrJ_5kBySyvFIHizVO4IRxbqFQbDrNJmTKW6KOoq0") {
+// Verificar se operações administrativas são permitidas
+if (!SECURITY_CONFIG.ALLOW_ADMIN_OPERATIONS) {
   console.warn(`
-    ⚠️ SERVICE ROLE KEY NÃO CONFIGURADA!
+    ⚠️ OPERAÇÕES ADMINISTRATIVAS NÃO PERMITIDAS!
     
-    Para configurar:
-    1. Vá ao Supabase Dashboard > Settings > API
-    2. Copie a "service_role" key
-    3. Crie um arquivo .env.local na raiz do projeto:
-       VITE_SUPABASE_SERVICE_ROLE_KEY=sua_chave_aqui
-    4. Ou substitua diretamente neste arquivo (apenas para desenvolvimento)
+    Motivo: ${SECURITY_CONFIG.PRODUCTION_WARNING || 'Service Role Key não configurada'}
     
-    ⚠️ NUNCA commite a service role key no Git!
+    Para desenvolvimento:
+    1. Configure a Service Role Key em src/config/supabase.ts
+    2. Ou use variável de ambiente VITE_SUPABASE_SERVICE_ROLE_KEY
+    
+    Para produção:
+    - Use um backend ou Supabase Edge Functions
+    - NUNCA exponha a service role key no frontend
   `);
 }
 
 export const supabaseAdmin = createClient<Database>(
-  SUPABASE_URL, 
-  SUPABASE_SERVICE_ROLE_KEY,
+  SUPABASE_CONFIG.URL, 
+  SUPABASE_CONFIG.SERVICE_ROLE_KEY,
   {
     auth: {
       autoRefreshToken: false,
@@ -51,12 +43,12 @@ export const createUserWithAuth = async (userData: {
   role: 'super-admin' | 'admin' | 'barber' | 'client';
   barbershopId?: string;
 }) => {
-  // Verificar se a service role key está configurada
-  if (!SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_ROLE_KEY === "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNubmZzYWtrb2F1dW5na3ByYmtyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDk0NDcwMSwiZXhwIjoyMDY2NTIwNzAxfQ.kmBrJ_5kBySyvFIHizVO4IRxbqFQbDrNJmTKW6KOoq0") {
+  // Verificar se operações administrativas são permitidas
+  if (!SECURITY_CONFIG.ALLOW_ADMIN_OPERATIONS) {
     return {
       success: false,
-      error: "Service Role Key não configurada. Veja as instruções no console.",
-      message: "Configure a Service Role Key para criar usuários automaticamente"
+      error: SECURITY_CONFIG.PRODUCTION_WARNING || ERROR_MESSAGES.SERVICE_ROLE_NOT_CONFIGURED,
+      message: "Operações administrativas não permitidas neste ambiente"
     };
   }
 
@@ -113,12 +105,12 @@ export const createUserWithAuth = async (userData: {
 
 // Função para deletar usuário completo
 export const deleteUserWithAuth = async (userId: string) => {
-  // Verificar se a service role key está configurada
-  if (!SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_ROLE_KEY === "SUA_SERVICE_ROLE_KEY_AQUI") {
+  // Verificar se operações administrativas são permitidas
+  if (!SECURITY_CONFIG.ALLOW_ADMIN_OPERATIONS) {
     return {
       success: false,
-      error: "Service Role Key não configurada. Veja as instruções no console.",
-      message: "Configure a Service Role Key para deletar usuários automaticamente"
+      error: SECURITY_CONFIG.PRODUCTION_WARNING || ERROR_MESSAGES.SERVICE_ROLE_NOT_CONFIGURED,
+      message: "Operações administrativas não permitidas neste ambiente"
     };
   }
 
