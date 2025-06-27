@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -28,22 +27,17 @@ export const LoginForm: React.FC = () => {
         description: "Bem-vindo ao BarberPro",
       });
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Erro no login:', error);
       toast({
         title: "Erro no login",
-        description: "Verifique suas credenciais e tente novamente",
+        description: error.message || "Verifique suas credenciais e tente novamente",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  const demoCredentials = [
-    { email: 'super@barberpro.com', role: 'Super Admin' },
-    { email: 'admin@barberpro.com', role: 'Administrador' },
-    { email: 'joao@barberpro.com', role: 'Barbeiro' }
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
@@ -125,25 +119,13 @@ export const LoginForm: React.FC = () => {
 
         <Card className="bg-slate-800/30 backdrop-blur-sm border-amber-500/10">
           <CardHeader>
-            <CardTitle className="text-sm text-white">Credenciais de Demonstração</CardTitle>
+            <CardTitle className="text-sm text-white">Informações</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {demoCredentials.map((cred, index) => (
-              <Button
-                key={index}
-                variant="ghost"
-                size="sm"
-                className="w-full justify-between text-xs text-gray-300 hover:text-white hover:bg-slate-700/50"
-                onClick={() => {
-                  setEmail(cred.email);
-                  setPassword('demo123');
-                }}
-              >
-                <span>{cred.role}</span>
-                <span className="text-amber-400">{cred.email}</span>
-              </Button>
-            ))}
-            <p className="text-xs text-gray-500 mt-2">Senha para todos: demo123</p>
+          <CardContent>
+            <p className="text-xs text-gray-400">
+              Use as credenciais do usuário que você cadastrou no Supabase.
+              Certifique-se de que o usuário existe tanto na autenticação quanto na tabela users.
+            </p>
           </CardContent>
         </Card>
       </div>
