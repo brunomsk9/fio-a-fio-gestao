@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  barbearia-app:
+    build: .
+    container_name: barbearia-app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+    volumes:
+      - ./logs:/var/log/nginx
+    networks:
+      - barbearia-network
+
+  # Serviço de monitoramento (opcional)
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx-proxy/certs:/etc/nginx/certs
+      - ./nginx-proxy/vhost.d:/etc/nginx/vhost.d
+      - ./nginx-proxy/html:/usr/share/nginx/html
+    networks:
+      - barbearia-network
+
+  # Certbot para SSL (opcional)
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./nginx-proxy/certs:/etc/letsencrypt
+      - ./nginx-proxy/www:/var/www/certbot
+    command: certonly --webroot --webroot-path=/var/www/certbot --email seu-email@exemplo.com --agree-tos --no-eff-email -d seu-dominio.com
+
+networks:
+  barbearia-network:
+    driver: bridge
+
+volumes:
+  logs: 

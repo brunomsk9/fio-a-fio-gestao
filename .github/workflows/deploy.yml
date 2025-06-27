@@ -1,0 +1,97 @@
+name: Deploy to Digital Ocean
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build application
+      run: npm run build
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        NODE_ENV: production
+        
+    - name: Deploy to Digital Ocean (EasyPanel)
+      if: github.ref == 'refs/heads/main'
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DROPLET_HOST }}
+        username: ${{ secrets.DROPLET_USERNAME }}
+        key: ${{ secrets.DROPLET_SSH_KEY }}
+        script: |
+          # Navegar para o diretório do projeto
+          cd /opt/easypanel/projects/barbearia-app
+          
+          # Pull das mudanças
+          git pull origin main
+          
+          # Instalar dependências
+          npm ci --only=production
+          
+          # Build da aplicação
+          npm run build
+          
+          # Reiniciar serviço (se necessário)
+          # systemctl restart nginx
+          
+          echo "Deploy concluído com sucesso!"
+          
+    - name: Deploy to Digital Ocean (Docker)
+      if: github.ref == 'refs/heads/main' && false
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DROPLET_HOST }}
+        username: ${{ secrets.DROPLET_USERNAME }}
+        key: ${{ secrets.DROPLET_SSH_KEY }}
+        script: |
+          # Navegar para o diretório do projeto
+          cd /opt/barbearia-app
+          
+          # Pull das mudanças
+          git pull origin main
+          
+          # Build da imagem Docker
+          docker build -t barbearia-app .
+          
+          # Parar container anterior
+          docker stop barbearia-app || true
+          docker rm barbearia-app || true
+          
+          # Executar novo container
+          docker run -d \
+            --name barbearia-app \
+            --restart unless-stopped \
+            -p 80:80 \
+            -e VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }} \
+            -e VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }} \
+            barbearia-app
+            
+          echo "Deploy Docker concluído com sucesso!"
+          
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          echo "✅ Deploy realizado com sucesso!"
+        else
+          echo "❌ Deploy falhou!"
+        fi 
