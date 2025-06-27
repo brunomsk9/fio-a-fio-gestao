@@ -6,11 +6,13 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Alert, AlertDescription } from '../components/ui/alert';
 import { toast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
+import { createUserWithAuth, deleteUserWithAuth } from '../integrations/supabase/adminClient';
 import { useAuthStore } from '../store/authStore';
 import { User, Barbershop } from '../types';
-import { Plus, Edit, Trash2, UserPlus, Crown, Shield, Scissors, User as UserIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, UserPlus, Crown, Shield, Scissors, User as UserIcon, AlertCircle, Info, Key } from 'lucide-react';
 
 const UsersPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -114,34 +116,24 @@ const UsersPage: React.FC = () => {
         if (error) throw error;
         toast({ title: "Sucesso!", description: "Usuário atualizado com sucesso" });
       } else {
-        // Criar novo usuário
-        // Primeiro, criar na autenticação do Supabase
-        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        // Criar novo usuário usando o cliente administrativo
+        const result = await createUserWithAuth({
           email: formData.email,
           password: formData.password,
-          email_confirm: true
+          name: formData.name,
+          phone: formData.phone,
+          role: formData.role,
+          barbershopId: formData.barbershopId || undefined
         });
-
-        if (authError) throw authError;
-
-        if (!authData.user) {
-          throw new Error('Erro ao criar usuário na autenticação');
-        }
-
-        // Depois, criar na tabela users
-        const { error: userError } = await supabase
-          .from('users')
-          .insert([{
-            id: authData.user.id,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            role: formData.role,
-            barbershop_id: formData.barbershopId || null
-          }]);
         
-        if (userError) throw userError;
-        toast({ title: "Sucesso!", description: "Usuário criado com sucesso" });
+        if (result.success) {
+          toast({ 
+            title: "Sucesso!", 
+            description: result.message 
+          });
+        } else {
+          throw new Error(result.error);
+        }
       }
       
       setIsDialogOpen(false);
@@ -175,28 +167,19 @@ const UsersPage: React.FC = () => {
     if (!confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.')) return;
     
     try {
-      // Primeiro, deletar da tabela users
-      const { error: userError } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', id);
+      const result = await deleteUserWithAuth(id);
       
-      if (userError) throw userError;
-
-      // Depois, deletar da autenticação (se possível)
-      try {
-        await supabase.auth.admin.deleteUser(id);
-      } catch (authError) {
-        console.warn('Não foi possível deletar da autenticação:', authError);
+      if (result.success) {
+        toast({ title: "Sucesso!", description: result.message });
+        fetchUsers();
+      } else {
+        throw new Error(result.error);
       }
-      
-      toast({ title: "Sucesso!", description: "Usuário excluído com sucesso" });
-      fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting user:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível excluir o usuário",
+        description: error.message || "Não foi possível excluir o usuário",
         variant: "destructive"
       });
     }
@@ -261,12 +244,22 @@ const UsersPage: React.FC = () => {
                 Novo Usuário
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-gray-800 border-blue-500/20">
+            <DialogContent className="bg-gray-800 border-blue-500/20 max-w-md">
               <DialogHeader>
                 <DialogTitle className="text-white">
                   {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
                 </DialogTitle>
               </DialogHeader>
+              
+              {!editingUser && (
+                <Alert className="bg-green-500/10 border-green-500/20">
+                  <Key className="h-4 w-4 text-green-400" />
+                  <AlertDescription className="text-green-300 text-sm">
+                    O usuário será criado automaticamente na autenticação e na tabela.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="name" className="text-white">Nome</Label>
