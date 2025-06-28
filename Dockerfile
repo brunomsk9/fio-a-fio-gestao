@@ -23,8 +23,19 @@ RUN npm ci
 COPY . .
 
 # Build da aplicação
-#RUN npm run build
-RUN VITE_SUPABASE_URL=$`VITE_SUPABASE_URL  VITE_SUPABASE_ANON_KEY=`$VITE_SUPABASE_ANON_KEY npm run build
+# ... (linhas anteriores do Dockerfile)
+
+# Passar os argumentos de build como variáveis de ambiente para o ambiente de build
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+
+# Criar arquivo .env para o Vite ler as variáveis de ambiente
+RUN echo "VITE_SUPABASE_URL=${VITE_SUPABASE_URL}" > .env && \
+    echo "VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}" >> .env
+
+# Build da aplicação
+RUN npm run build
+
 
 # Estágio de produção com Nginx
 FROM nginx:alpine
