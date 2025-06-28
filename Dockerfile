@@ -23,7 +23,8 @@ RUN npm ci
 COPY . .
 
 # Build da aplicação
-RUN npm run build
+#RUN npm run build
+RUN VITE_SUPABASE_URL=$`VITE_SUPABASE_URL  VITE_SUPABASE_ANON_KEY=`$VITE_SUPABASE_ANON_KEY npm run build
 
 # Estágio de produção com Nginx
 FROM nginx:alpine
