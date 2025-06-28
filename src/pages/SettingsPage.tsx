@@ -14,6 +14,7 @@ import { useAuthStore } from '../store/authStore';
 import { supabase } from '../integrations/supabase/client';
 import { Settings, Bell, Shield, Palette, Save, Globe, ExternalLink, CheckCircle, AlertCircle, Clock, Copy } from 'lucide-react';
 import { Barbershop, DomainSettings } from '../types';
+import { transformDatabaseBarbershop } from '../utils/dataTransforms';
 
 const SettingsPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -64,7 +65,11 @@ const SettingsPage: React.FC = () => {
         .order('name');
 
       if (error) throw error;
-      setBarbershops(data || []);
+      
+      if (data) {
+        const transformedBarbershops = data.map(transformDatabaseBarbershop);
+        setBarbershops(transformedBarbershops);
+      }
     } catch (error) {
       console.error('Erro ao buscar barbearias:', error);
     }
