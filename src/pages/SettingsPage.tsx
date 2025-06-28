@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -67,7 +68,7 @@ const SettingsPage: React.FC = () => {
       if (error) throw error;
       
       if (data) {
-        const transformedBarbershops = data.map(transformDatabaseBarbershop);
+        const transformedBarbershops = data.map((dbBarbershop) => transformDatabaseBarbershop(dbBarbershop));
         setBarbershops(transformedBarbershops);
       }
     } catch (error) {
