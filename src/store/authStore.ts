@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { supabase } from '../integrations/supabase/client';
 import { User } from '../types';
@@ -11,40 +12,6 @@ interface AuthStore {
   setUser: (user: User) => void;
   checkAuth: () => Promise<void>;
 }
-
-// Mock users for demonstration
-const mockUsers: User[] = [
-  {
-    id: '1',
-    name: 'Super Admin',
-    email: 'super@barberpro.com',
-    phone: '(11) 99999-9999',
-    role: 'super-admin'
-  },
-  {
-    id: '2',
-    name: 'Admin Barbearia',
-    email: 'admin@barberpro.com',
-    phone: '(11) 99999-9998',
-    role: 'admin',
-    barbershopId: '1'
-  },
-  {
-    id: '3',
-    name: 'João Barbeiro',
-    email: 'joao@barberpro.com',
-    phone: '(11) 99999-9997',
-    role: 'barber',
-    barbershopId: '1'
-  },
-  {
-    id: '4',
-    name: 'Cliente Teste',
-    email: 'cliente@barberpro.com',
-    phone: '(11) 99999-9996',
-    role: 'client'
-  }
-];
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
@@ -98,11 +65,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
           const { data: adminBarbershops, error: barbershopError } = await supabase
             .from('barbershops')
-            .select('id, name')
+            .select('id, name, address, phone, admin_id, created_at')
             .eq('admin_id', userData.id);
 
           if (!barbershopError && adminBarbershops) {
-            user.barbershops = adminBarbershops;
+            user.barbershops = adminBarbershops.map(shop => ({
+              id: shop.id,
+              name: shop.name,
+              address: shop.address,
+              phone: shop.phone,
+              adminId: shop.admin_id,
+              services: [],
+              barbers: [],
+              createdAt: new Date(shop.created_at)
+            }));
           }
         } catch (error) {
           console.error('Erro ao buscar barbearias do admin:', error);
@@ -177,11 +153,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
           const { data: adminBarbershops, error: barbershopError } = await supabase
             .from('barbershops')
-            .select('id, name')
+            .select('id, name, address, phone, admin_id, created_at')
             .eq('admin_id', userData.id);
 
           if (!barbershopError && adminBarbershops) {
-            user.barbershops = adminBarbershops;
+            user.barbershops = adminBarbershops.map(shop => ({
+              id: shop.id,
+              name: shop.name,
+              address: shop.address,
+              phone: shop.phone,
+              adminId: shop.admin_id,
+              services: [],
+              barbers: [],
+              createdAt: new Date(shop.created_at)
+            }));
           }
         } catch (error) {
           console.error('Erro ao buscar barbearias do admin:', error);
