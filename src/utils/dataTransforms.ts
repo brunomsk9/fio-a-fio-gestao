@@ -48,7 +48,7 @@ export const transformDatabaseBooking = (dbBooking: DatabaseBooking & {
   serviceId: dbBooking.service_id || '',
   date: new Date(dbBooking.date),
   time: dbBooking.time,
-  status: dbBooking.status as 'scheduled' | 'completed' | 'cancelled',
+  status: dbBooking.status as 'scheduled' | 'completed' | 'cancelled' | 'confirmed',
   createdAt: new Date(dbBooking.created_at || Date.now()),
   notes: dbBooking.notes || undefined,
   barber: dbBooking.barber ? transformDatabaseBarber(dbBooking.barber) : undefined,

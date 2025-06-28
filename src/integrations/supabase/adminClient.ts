@@ -1,3 +1,4 @@
+
 // Cliente Supabase para operações administrativas
 // ⚠️ ATENÇÃO: Este arquivo deve ser usado apenas no backend ou em operações seguras
 // NUNCA exponha a service role key no frontend público
@@ -34,15 +35,19 @@ export const supabaseAdmin = createClient<Database>(
   }
 );
 
-// Função para criar usuário completo (autenticação + tabela)
-export const createUserWithAuth = async (userData: {
+// Interface para criação de usuário
+interface CreateUserData {
   email: string;
   password: string;
   name: string;
   phone: string;
   role: 'super-admin' | 'admin' | 'barber' | 'client';
   barbershopId?: string;
-}) => {
+  barbershopIds?: string[];
+}
+
+// Função para criar usuário completo (autenticação + tabela)
+export const createUserWithAuth = async (userData: CreateUserData) => {
   // Verificar se operações administrativas são permitidas
   if (!SECURITY_CONFIG.ALLOW_ADMIN_OPERATIONS) {
     return {

@@ -75,7 +75,7 @@ export interface Booking {
   serviceId: string;
   date: Date;
   time: string;
-  status: 'scheduled' | 'completed' | 'cancelled';
+  status: 'scheduled' | 'completed' | 'cancelled' | 'confirmed';
   createdAt: Date;
   notes?: string; // Adicionando propriedade notes
   // Optional joined data from Supabase queries
@@ -90,6 +90,17 @@ export interface WorkingHours {
     end: string;
     isWorking: boolean;
   };
+}
+
+// Interface para criação de usuário (com barbershopIds)
+export interface CreateUserData {
+  email: string;
+  password: string;
+  name: string;
+  phone: string;
+  role: 'super-admin' | 'admin' | 'barber' | 'client';
+  barbershopId?: string;
+  barbershopIds?: string[];
 }
 
 // Database row types (snake_case as returned by Supabase)

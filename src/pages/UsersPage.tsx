@@ -13,7 +13,8 @@ import { toast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { createUserWithAuth, deleteUserWithAuth } from '../integrations/supabase/adminClient';
 import { useAuthStore } from '../store/authStore';
-import { User, Barbershop } from '../types';
+import { User, Barbershop, CreateUserData } from '../types';
+import { transformDatabaseBarbershop, transformDatabaseUser } from '../utils/dataTransforms';
 import { Plus, Edit, Trash2, UserPlus, Crown, Shield, Scissors, User as UserIcon, Key, Search, Filter, Users, Building2, X } from 'lucide-react';
 
 const UsersPage: React.FC = () => {
@@ -25,13 +26,13 @@ const UsersPage: React.FC = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateUserData>({
     name: '',
     email: '',
     phone: '',
-    role: 'client' as 'super-admin' | 'admin' | 'barber' | 'client',
+    role: 'client',
     barbershopId: '',
-    barbershopIds: [] as string[],
+    barbershopIds: [],
     password: ''
   });
 
@@ -57,7 +58,12 @@ const UsersPage: React.FC = () => {
         .order('name');
 
       if (error) throw error;
-      setBarbershops(data || []);
+      
+      const transformedBarbershops = (data || []).map(dbBarbershop => 
+        transformDatabaseBarbershop(dbBarbershop)
+      );
+      
+      setBarbershops(transformedBarbershops);
     } catch (error) {
       console.error('Erro ao buscar barbearias:', error);
     }
@@ -81,16 +87,7 @@ const UsersPage: React.FC = () => {
 
       console.log('Usuários encontrados:', data?.length || 0);
 
-      const mappedUsers: User[] = (data || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        email: item.email,
-        phone: item.phone,
-        role: item.role as any,
-        barbershopId: item.barbershop_id || undefined,
-        barbershop: undefined,
-        barbershops: []
-      }));
+      const mappedUsers: User[] = (data || []).map(transformDatabaseUser);
 
       setUsers(mappedUsers);
       console.log('Usuários mapeados:', mappedUsers.length);
@@ -126,23 +123,21 @@ const UsersPage: React.FC = () => {
         if (error) throw error;
 
         // Se for admin e há barbearias selecionadas, vincular às barbearias
-        if (formData.role === 'admin' && formData.barbershopIds.length > 0) {
-          const updates = formData.barbershopIds.map(barbershopId => ({
-            id: barbershopId,
-            admin_id: editingUser.id
-          }));
+        if (formData.role === 'admin' && formData.barbershopIds && formData.barbershopIds.length > 0) {
+          for (const barbershopId of formData.barbershopIds) {
+            const { error: barbershopError } = await supabase
+              .from('barbershops')
+              .update({ admin_id: editingUser.id })
+              .eq('id', barbershopId);
 
-          const { error: barbershopError } = await supabase
-            .from('barbershops')
-            .upsert(updates);
-
-          if (barbershopError) {
-            console.warn('Erro ao vincular admin às barbearias:', barbershopError);
+            if (barbershopError) {
+              console.warn('Erro ao vincular admin à barbearia:', barbershopError);
+            }
           }
         }
 
         // Se for barbeiro e há barbearias selecionadas, vincular às barbearias
-        if (formData.role === 'barber' && formData.barbershopIds.length > 0) {
+        if (formData.role === 'barber' && formData.barbershopIds && formData.barbershopIds.length > 0) {
           const barberBarbershopsData = formData.barbershopIds.map(barbershopId => ({
             barber_id: editingUser.id,
             barbershop_id: barbershopId
@@ -160,32 +155,22 @@ const UsersPage: React.FC = () => {
         toast({ title: "Sucesso!", description: "Usuário atualizado com sucesso" });
       } else {
         // Criar novo usuário usando o cliente administrativo
-        const result = await createUserWithAuth({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name,
-          phone: formData.phone,
-          role: formData.role,
-          barbershopId: formData.barbershopId || undefined,
-          barbershopIds: formData.barbershopIds.length > 0 ? formData.barbershopIds : undefined
-        });
+        const result = await createUserWithAuth(formData);
         
         if (result.success && result.user?.id) {
           // Se há barbearias selecionadas, vincular automaticamente
-          if (formData.barbershopIds.length > 0) {
+          if (formData.barbershopIds && formData.barbershopIds.length > 0) {
             if (formData.role === 'admin') {
               // Vincular admin às barbearias
-              const updates = formData.barbershopIds.map(barbershopId => ({
-                id: barbershopId,
-                admin_id: result.user.id
-              }));
+              for (const barbershopId of formData.barbershopIds) {
+                const { error: barbershopError } = await supabase
+                  .from('barbershops')
+                  .update({ admin_id: result.user.id })
+                  .eq('id', barbershopId);
 
-              const { error: barbershopError } = await supabase
-                .from('barbershops')
-                .upsert(updates);
-
-              if (barbershopError) {
-                console.warn('Erro ao vincular admin às barbearias:', barbershopError);
+                if (barbershopError) {
+                  console.warn('Erro ao vincular admin à barbearia:', barbershopError);
+                }
               }
             } else if (formData.role === 'barber') {
               // Vincular barbeiro às barbearias
@@ -206,7 +191,7 @@ const UsersPage: React.FC = () => {
 
           toast({ 
             title: "Sucesso!", 
-            description: formData.barbershopIds.length > 0 
+            description: formData.barbershopIds && formData.barbershopIds.length > 0 
               ? `Usuário criado e vinculado a ${formData.barbershopIds.length} barbearia(s)`
               : result.message 
           });
@@ -342,9 +327,9 @@ const UsersPage: React.FC = () => {
   const toggleBarbershopSelection = (barbershopId: string) => {
     setFormData(prev => ({
       ...prev,
-      barbershopIds: prev.barbershopIds.includes(barbershopId)
+      barbershopIds: prev.barbershopIds?.includes(barbershopId)
         ? prev.barbershopIds.filter(id => id !== barbershopId)
-        : [...prev.barbershopIds, barbershopId]
+        : [...(prev.barbershopIds || []), barbershopId]
     }));
   };
 
@@ -352,7 +337,7 @@ const UsersPage: React.FC = () => {
   const removeBarbershopFromSelection = (barbershopId: string) => {
     setFormData(prev => ({
       ...prev,
-      barbershopIds: prev.barbershopIds.filter(id => id !== barbershopId)
+      barbershopIds: prev.barbershopIds?.filter(id => id !== barbershopId) || []
     }));
   };
 
@@ -369,7 +354,7 @@ const UsersPage: React.FC = () => {
 
   // Selecionar todas as barbearias filtradas
   const selectAllFiltered = () => {
-    const newBarbershopIds = [...formData.barbershopIds];
+    const newBarbershopIds = [...(formData.barbershopIds || [])];
     filteredBarbershops.forEach(barbershop => {
       if (!newBarbershopIds.includes(barbershop.id)) {
         newBarbershopIds.push(barbershop.id);
@@ -380,7 +365,7 @@ const UsersPage: React.FC = () => {
 
   // Desmarcar todas as barbearias filtradas
   const deselectAllFiltered = () => {
-    const newBarbershopIds = formData.barbershopIds.filter(id => 
+    const newBarbershopIds = (formData.barbershopIds || []).filter(id => 
       !filteredBarbershops.find(barbershop => barbershop.id === id)
     );
     setFormData(prev => ({ ...prev, barbershopIds: newBarbershopIds }));
@@ -473,12 +458,13 @@ const UsersPage: React.FC = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                  
                   {(formData.role === 'admin' || formData.role === 'barber') && (
                     <div className="space-y-3">
                       <Label className="text-gray-700">Barbearias</Label>
                       
                       {/* Barbearias Selecionadas */}
-                      {formData.barbershopIds.length > 0 && (
+                      {formData.barbershopIds && formData.barbershopIds.length > 0 && (
                         <div className="space-y-2">
                           <p className="text-sm text-gray-600">Barbearias selecionadas:</p>
                           <div className="flex flex-wrap gap-2">
@@ -564,32 +550,32 @@ const UsersPage: React.FC = () => {
                               <div 
                                 key={barbershop.id} 
                                 className={`flex items-center space-x-3 p-2 rounded transition-colors ${
-                                  formData.barbershopIds.includes(barbershop.id)
+                                  formData.barbershopIds?.includes(barbershop.id)
                                     ? 'bg-blue-50 border border-blue-200'
                                     : 'hover:bg-gray-50'
                                 }`}
                               >
                                 <Checkbox
-                                  checked={formData.barbershopIds.includes(barbershop.id)}
+                                  checked={formData.barbershopIds?.includes(barbershop.id) || false}
                                   onCheckedChange={() => toggleBarbershopSelection(barbershop.id)}
                                 />
                                 <div className="flex-1">
                                   <div className={`font-medium ${
-                                    formData.barbershopIds.includes(barbershop.id)
+                                    formData.barbershopIds?.includes(barbershop.id)
                                       ? 'text-blue-900'
                                       : 'text-gray-900'
                                   }`}>
                                     {barbershop.name}
                                   </div>
                                   <div className={`text-sm ${
-                                    formData.barbershopIds.includes(barbershop.id)
+                                    formData.barbershopIds?.includes(barbershop.id)
                                       ? 'text-blue-700'
                                       : 'text-gray-600'
                                   }`}>
                                     {barbershop.address}
                                   </div>
                                 </div>
-                                {formData.barbershopIds.includes(barbershop.id) && (
+                                {formData.barbershopIds?.includes(barbershop.id) && (
                                   <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
                                     Selecionada
                                   </Badge>
@@ -616,6 +602,7 @@ const UsersPage: React.FC = () => {
                       </div>
                     </div>
                   )}
+                  
                   {!editingUser && (
                     <div className="space-y-2">
                       <Label htmlFor="password" className="text-gray-700">Senha</Label>
@@ -800,4 +787,4 @@ const UsersPage: React.FC = () => {
   );
 };
 
-export default UsersPage; 
+export default UsersPage;
