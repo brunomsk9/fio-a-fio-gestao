@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { createUserWithAuth, deleteUserWithAuth } from '../integrations/supabase/adminClient';
@@ -12,7 +13,7 @@ import { Trash2, Users, Building, Calendar, BarChart3, UserPlus } from 'lucide-r
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { toast } from './ui/sonner';
 import { User, Barbershop } from '../types';
-import { transformDatabaseUser } from '../utils/dataTransforms';
+import { transformDatabaseUser, transformDatabaseBarbershop } from '../utils/dataTransforms';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuthStore();
@@ -98,7 +99,7 @@ export const Dashboard: React.FC = () => {
       if (error) throw error;
 
       if (data) {
-        const transformedUsers = data.map(transformDatabaseUser);
+        const transformedUsers = data.map((dbUser) => transformDatabaseUser(dbUser));
         setUsers(transformedUsers);
       }
     } catch (error) {
@@ -116,19 +117,8 @@ export const Dashboard: React.FC = () => {
       if (error) throw error;
 
       if (data) {
-        setBarbershops(data.map(shop => ({
-          id: shop.id,
-          name: shop.name,
-          address: shop.address,
-          phone: shop.phone,
-          adminId: shop.admin_id || '',
-          services: [],
-          barbers: [],
-          createdAt: new Date(shop.created_at || Date.now()),
-          subdomain: shop.subdomain || undefined,
-          customDomain: shop.custom_domain || undefined,
-          domainEnabled: shop.domain_enabled || false
-        })));
+        const transformedBarbershops = data.map((dbBarbershop) => transformDatabaseBarbershop(dbBarbershop));
+        setBarbershops(transformedBarbershops);
       }
     } catch (error) {
       console.error('Erro ao carregar barbearias:', error);

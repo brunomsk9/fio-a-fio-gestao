@@ -67,9 +67,9 @@ export const transformDatabaseService = (dbService: DatabaseService): Service =>
 
 export const transformDatabaseUser = (dbUser: any): User => ({
   id: dbUser.id,
-  name: dbUser.name,
-  email: dbUser.email,
-  phone: dbUser.phone,
-  role: dbUser.role as 'super-admin' | 'admin' | 'barber' | 'client',
+  name: dbUser.name || '',
+  email: dbUser.email || '',
+  phone: dbUser.phone || '',
+  role: (dbUser.role || 'client') as 'super-admin' | 'admin' | 'barber' | 'client',
   barbershopId: dbUser.barbershop_id || undefined
 });
