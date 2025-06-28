@@ -4,6 +4,7 @@ import {
   Barbershop, 
   Booking, 
   Service,
+  User,
   DatabaseBarber,
   DatabaseBarbershop,
   DatabaseBooking,
@@ -28,7 +29,10 @@ export const transformDatabaseBarbershop = (dbBarbershop: DatabaseBarbershop, se
   adminId: dbBarbershop.admin_id || '',
   services: services,
   barbers: [], // Will be populated if needed
-  createdAt: new Date(dbBarbershop.created_at || Date.now())
+  createdAt: new Date(dbBarbershop.created_at || Date.now()),
+  subdomain: dbBarbershop.subdomain || undefined,
+  customDomain: dbBarbershop.custom_domain || undefined,
+  domainEnabled: dbBarbershop.domain_enabled || false
 });
 
 export const transformDatabaseBooking = (dbBooking: DatabaseBooking & { 
@@ -46,6 +50,7 @@ export const transformDatabaseBooking = (dbBooking: DatabaseBooking & {
   time: dbBooking.time,
   status: dbBooking.status as 'scheduled' | 'completed' | 'cancelled',
   createdAt: new Date(dbBooking.created_at || Date.now()),
+  notes: dbBooking.notes || undefined,
   barber: dbBooking.barber ? transformDatabaseBarber(dbBooking.barber) : undefined,
   barbershop: dbBooking.barbershop ? transformDatabaseBarbershop(dbBooking.barbershop) : undefined,
   service: dbBooking.service ? transformDatabaseService(dbBooking.service) : undefined
@@ -58,4 +63,13 @@ export const transformDatabaseService = (dbService: DatabaseService): Service =>
   price: dbService.price,
   description: dbService.description || undefined,
   barbershopId: dbService.barbershop_id || undefined
+});
+
+export const transformDatabaseUser = (dbUser: any): User => ({
+  id: dbUser.id,
+  name: dbUser.name,
+  email: dbUser.email,
+  phone: dbUser.phone,
+  role: dbUser.role as 'super-admin' | 'admin' | 'barber' | 'client',
+  barbershopId: dbUser.barbershop_id || undefined
 });

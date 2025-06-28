@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -8,6 +9,7 @@ export interface User {
   barbershop?: Barbershop;
   // Para admin que pode ser responsável por múltiplas barbearias
   barbershops?: Barbershop[];
+  avatar?: string; // Adicionando propriedade avatar
 }
 
 export interface Barbershop {
@@ -75,6 +77,7 @@ export interface Booking {
   time: string;
   status: 'scheduled' | 'completed' | 'cancelled';
   createdAt: Date;
+  notes?: string; // Adicionando propriedade notes
   // Optional joined data from Supabase queries
   barber?: Barber;
   barbershop?: Barbershop;
@@ -142,6 +145,7 @@ export interface DatabaseBooking {
   date: string;
   time: string;
   status: string;
+  notes?: string | null;
   created_at: string | null;
   updated_at: string | null;
 }

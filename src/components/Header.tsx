@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -70,7 +71,7 @@ export const Header: React.FC = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-gray-100/80">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={user.avatar || ''} alt={user.name} />
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
                     {user.name.charAt(0).toUpperCase()}
                   </AvatarFallback>

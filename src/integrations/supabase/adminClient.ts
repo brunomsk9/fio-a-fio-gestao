@@ -231,4 +231,4 @@ export const syncExistingBarbers = async () => {
       message: 'Erro ao sincronizar barbeiros'
     };
   }
-}; 
+};
