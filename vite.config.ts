@@ -18,10 +18,11 @@ export default defineConfig(({ mode } ) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   }, 
-  define: {
-    // Garante que o valor seja uma string antes de stringificar
-    'process.env.VITE_SUPABASE_URL': JSON.stringify(process.env.VITE_SUPABASE_URL || ''),
-    'process.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY || ''),
+   define: {
+    // Use JSON.stringify aqui novamente
+    'process.env.VITE_SUPABASE_URL': JSON.stringify(process.env.VITE_SUPABASE_URL),
+    'process.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY),
   }
+
  
 }));
