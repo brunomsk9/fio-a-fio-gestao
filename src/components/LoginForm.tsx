@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -6,7 +7,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Scissors, Eye, EyeOff, ArrowLeft } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '../components/ui/sonner';
 
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
@@ -22,17 +23,14 @@ export const LoginForm: React.FC = () => {
 
     try {
       await login(email, password);
-      toast({
-        title: "Login realizado com sucesso!",
-        description: "Bem-vindo ao BarberPro",
+      toast.success("Login realizado com sucesso!", {
+        description: "Bem-vindo ao Fio a Fio",
       });
       navigate('/');
     } catch (error: any) {
       console.error('Erro no login:', error);
-      toast({
-        title: "Erro no login",
+      toast.error("Erro no login", {
         description: error.message || "Verifique suas credenciais e tente novamente",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -40,7 +38,7 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="flex items-center gap-4 mb-6">
           <Button
@@ -55,14 +53,14 @@ export const LoginForm: React.FC = () => {
         </div>
 
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mb-4 shadow-medium">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl mb-4 shadow-lg">
             <Scissors className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">BarberPro</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Fio a Fio</h1>
           <p className="text-gray-600">Login para Profissionais</p>
         </div>
 
-        <Card className="gradient-card shadow-medium border-gray-200">
+        <Card className="bg-white/80 backdrop-blur-md shadow-xl border-gray-200">
           <CardHeader>
             <CardTitle className="text-gray-900">Acesso Profissional</CardTitle>
             <CardDescription className="text-gray-600">
@@ -108,7 +106,7 @@ export const LoginForm: React.FC = () => {
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold shadow-medium"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold shadow-lg"
                 disabled={isLoading}
               >
                 {isLoading ? 'Entrando...' : 'Entrar'}
@@ -117,7 +115,7 @@ export const LoginForm: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gray-50 border-gray-200 shadow-soft">
+        <Card className="bg-gray-50/80 border-gray-200 shadow-lg backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-sm text-gray-900">Informações</CardTitle>
           </CardHeader>

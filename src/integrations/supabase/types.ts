@@ -88,27 +88,36 @@ export type Database = {
           address: string
           admin_id: string | null
           created_at: string | null
+          custom_domain: string | null
+          domain_enabled: boolean | null
           id: string
           name: string
           phone: string
+          subdomain: string | null
           updated_at: string | null
         }
         Insert: {
           address: string
           admin_id?: string | null
           created_at?: string | null
+          custom_domain?: string | null
+          domain_enabled?: boolean | null
           id?: string
           name: string
           phone: string
+          subdomain?: string | null
           updated_at?: string | null
         }
         Update: {
           address?: string
           admin_id?: string | null
           created_at?: string | null
+          custom_domain?: string | null
+          domain_enabled?: boolean | null
           id?: string
           name?: string
           phone?: string
+          subdomain?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -125,6 +134,7 @@ export type Database = {
         Row: {
           barber_id: string | null
           barbershop_id: string | null
+          client_email: string | null
           client_name: string
           client_phone: string
           created_at: string | null
@@ -138,6 +148,7 @@ export type Database = {
         Insert: {
           barber_id?: string | null
           barbershop_id?: string | null
+          client_email?: string | null
           client_name: string
           client_phone: string
           created_at?: string | null
@@ -151,6 +162,7 @@ export type Database = {
         Update: {
           barber_id?: string | null
           barbershop_id?: string | null
+          client_email?: string | null
           client_name?: string
           client_phone?: string
           created_at?: string | null
@@ -181,6 +193,50 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domain_settings: {
+        Row: {
+          barbershop_id: string | null
+          created_at: string | null
+          custom_domain: string | null
+          dns_configured: boolean | null
+          id: string
+          ssl_enabled: boolean | null
+          status: string | null
+          subdomain: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          barbershop_id?: string | null
+          created_at?: string | null
+          custom_domain?: string | null
+          dns_configured?: boolean | null
+          id?: string
+          ssl_enabled?: boolean | null
+          status?: string | null
+          subdomain?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          barbershop_id?: string | null
+          created_at?: string | null
+          custom_domain?: string | null
+          dns_configured?: boolean | null
+          id?: string
+          ssl_enabled?: boolean | null
+          status?: string | null
+          subdomain?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_settings_barbershop_id_fkey"
+            columns: ["barbershop_id"]
+            isOneToOne: false
+            referencedRelation: "barbershops"
             referencedColumns: ["id"]
           },
         ]
